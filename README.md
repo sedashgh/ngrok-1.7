@@ -32,3 +32,7 @@ are only available by creating an account on ngrok.com. If you need them, [creat
 
 ## Developing on ngrok
 [ngrok developer's guide](docs/DEVELOPMENT.md)
+
+## Compile in docker for windows
+Assuming you have cloned the repo to c:\projects\git\ngrok-1.7 in windows
+docker run --rm  -v c:/projects/git/ngrok-1.7:/ngrok -w /ngrok -e GOOS=windows -e GOARCH=amd64 golang:1.4.3-cross make release-client

@@ -26,6 +26,8 @@ type Tunnel struct {
 	PublicUrl string
 	Protocol  proto.Protocol
 	LocalAddr string
+	BindTls bool
+	Name string
 }
 
 type ConnectionContext struct {

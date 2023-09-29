@@ -52,6 +52,7 @@ type ClientModel struct {
 	tlsConfig     *tls.Config
 	tunnelConfig  map[string]*TunnelConfiguration
 	configPath    string
+	prvUseTls	  bool
 }
 
 func newClientModel(config *Configuration, ctl mvc.Controller) *ClientModel {
@@ -154,7 +155,7 @@ func (c ClientModel) SetUpdateStatus(updateStatus mvc.UpdateStatus) {
 // mvc.Model interface
 func (c *ClientModel) PlayRequest(tunnel mvc.Tunnel, payload []byte) {
 	var localConn conn.Conn
-	localConn, err := conn.Dial(tunnel.LocalAddr, "prv", nil)
+	localConn, err := conn.Dial2(tunnel.LocalAddr, "prv", tunnel.BindTls) // c.prvUseTls
 	if err != nil {
 		c.Warn("Failed to open private leg to %s: %v", tunnel.LocalAddr, err)
 		return
@@ -314,11 +315,13 @@ func (c *ClientModel) control() {
 				PublicUrl: m.Url,
 				LocalAddr: reqIdToTunnelConfig[m.ReqId].Protocols[m.Protocol],
 				Protocol:  c.protoMap[m.Protocol],
+				BindTls: reqIdToTunnelConfig[m.ReqId].BindTls,
+				Name: reqIdToTunnelConfig[m.ReqId].Subdomain,
 			}
 
 			c.tunnels[tunnel.PublicUrl] = tunnel
 			c.connStatus = mvc.ConnOnline
-			c.Info("Tunnel established at %v", tunnel.PublicUrl)
+			c.Info("Tunnel established at public address %v private address %v BindTls %v", tunnel.PublicUrl, tunnel.LocalAddr, tunnel.BindTls)
 			c.update()
 
 		default:
@@ -367,7 +370,7 @@ func (c *ClientModel) proxy() {
 
 	// start up the private connection
 	start := time.Now()
-	localConn, err := conn.Dial(tunnel.LocalAddr, "prv", nil)
+	localConn, err := conn.Dial2(tunnel.LocalAddr, "prv", tunnel.BindTls)	// c.prvUseTls
 	if err != nil {
 		remoteConn.Warn("Failed to open private leg %s: %v", tunnel.LocalAddr, err)
 

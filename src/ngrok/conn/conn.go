@@ -103,6 +103,25 @@ func Dial(addr, typ string, tlsCfg *tls.Config) (conn *loggedConn, err error) {
 	return
 }
 
+func Dial2(addr, typ string, prvUseTls bool) (conn *loggedConn, err error) {
+	var rawConn net.Conn
+	if rawConn, err = net.Dial("tcp", addr); err != nil {
+		return
+	}
+
+	conn = wrapConn(rawConn, typ)
+	conn.Debug("New connection to: %v", rawConn.RemoteAddr())
+
+	if prvUseTls{
+		tlsCfg := &tls.Config{
+			InsecureSkipVerify: true,
+		}
+		conn.StartTLS(tlsCfg)
+	}
+
+	return
+}
+
 func DialHttpProxy(proxyUrl, addr, typ string, tlsCfg *tls.Config) (conn *loggedConn, err error) {
 	// parse the proxy address
 	var parsedUrl *url.URL

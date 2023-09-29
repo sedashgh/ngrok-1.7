@@ -33,6 +33,7 @@ type TunnelConfiguration struct {
 	Protocols  map[string]string `yaml:"proto,omitempty"`
 	HttpAuth   string            `yaml:"auth,omitempty"`
 	RemotePort uint16            `yaml:"remote_port,omitempty"`
+	BindTls		bool            `yaml:"bind_tls,omitempty"`
 }
 
 func LoadConfiguration(opts *Options) (config *Configuration, err error) {
